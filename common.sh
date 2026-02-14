@@ -83,42 +83,54 @@ select_node() {
 }
 
 ###################################
-# Package Manager Selection
+# Package Manager Selection (ALWAYS ASK)
 ###################################
 select_package_manager() {
+
   echo ""
-  echo "📦 Detecting Package Manager..."
+  echo "👉 Select Package Manager"
 
-  if [[ -f "package-lock.json" ]]; then
-    PACKAGE_MANAGER="npm"
-    echo "✅ Found package-lock.json. Using npm."
-  elif [[ -f "yarn.lock" ]]; then
-    PACKAGE_MANAGER="yarn"
-    echo "✅ Found yarn.lock. Using yarn."
-  elif [[ -f "pnpm-lock.yaml" ]]; then
-    PACKAGE_MANAGER="pnpm"
-    echo "✅ Found pnpm-lock.yaml. Using pnpm."
-  else
-    echo "👉 Select Package Manager"
-    PM_OPTIONS=("npm")
-    command -v yarn >/dev/null && PM_OPTIONS+=("yarn")
-    command -v pnpm >/dev/null && PM_OPTIONS+=("pnpm")
-    PM_OPTIONS+=("Install yarn" "Install pnpm")
+  PM_OPTIONS=("npm")
 
-    select PM in "${PM_OPTIONS[@]}"; do
-      case "$PM" in
-        npm) PACKAGE_MANAGER="npm"; break ;;
-        yarn) PACKAGE_MANAGER="yarn"; break ;;
-        pnpm) PACKAGE_MANAGER="pnpm"; break ;;
-        "Install yarn") npm install -g yarn; PACKAGE_MANAGER="yarn"; break ;;
-        "Install pnpm") npm install -g pnpm; PACKAGE_MANAGER="pnpm"; break ;;
-        *) echo "❌ Invalid choice" ;;
-      esac
-    done
-  fi
+  command -v yarn >/dev/null && PM_OPTIONS+=("yarn")
+  command -v pnpm >/dev/null && PM_OPTIONS+=("pnpm")
 
+  PM_OPTIONS+=("Install yarn" "Install pnpm")
+
+  select PM in "${PM_OPTIONS[@]}"; do
+    case "$PM" in
+      npm)
+        PACKAGE_MANAGER="npm"
+        break
+        ;;
+      yarn)
+        PACKAGE_MANAGER="yarn"
+        break
+        ;;
+      pnpm)
+        PACKAGE_MANAGER="pnpm"
+        break
+        ;;
+      "Install yarn")
+        npm install -g yarn
+        PACKAGE_MANAGER="yarn"
+        break
+        ;;
+      "Install pnpm")
+        npm install -g pnpm
+        PACKAGE_MANAGER="pnpm"
+        break
+        ;;
+      *)
+        echo "❌ Invalid choice"
+        ;;
+    esac
+  done
+
+  echo "✅ Using $PACKAGE_MANAGER"
   export PACKAGE_MANAGER
 }
+
 
 ###################################
 # Find Next Available Port
